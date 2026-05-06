@@ -39,7 +39,7 @@ export class MenuController {
         return;
       }
       const categoryId = req.query.categoryId ? Number(req.query.categoryId) : undefined;
-      const includeUnavailable = req.user?.role === 'admin';
+      const includeUnavailable = true; // Show sold-out items with badge instead of hiding
       const menus = menuService.getMenus(storeId, categoryId, includeUnavailable);
       sendSuccess(res, menus);
     } catch (err: any) {

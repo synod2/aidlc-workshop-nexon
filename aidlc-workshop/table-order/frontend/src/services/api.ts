@@ -9,8 +9,19 @@ const api = axios.create({
 
 // Request interceptor: attach JWT token
 api.interceptors.request.use((config) => {
-  const token =
-    localStorage.getItem('admin_token') || localStorage.getItem('table_token');
+  // Use table token for customer paths, admin token for admin paths
+  const path = window.location.pathname;
+  let token: string | null = null;
+
+  if (path.startsWith('/customer')) {
+    token = localStorage.getItem('table_token');
+  } else if (path.startsWith('/admin')) {
+    token = localStorage.getItem('admin_token');
+  } else {
+    // Fallback: try both
+    token = localStorage.getItem('table_token') || localStorage.getItem('admin_token');
+  }
+
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }

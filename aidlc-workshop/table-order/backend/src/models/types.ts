@@ -60,7 +60,7 @@ export interface Order {
   createdAt: string;
 }
 
-export type OrderStatus = 'pending' | 'preparing' | 'completed';
+export type OrderStatus = 'pending' | 'preparing' | 'completed' | 'rejected';
 
 export interface OrderItem {
   id: number;

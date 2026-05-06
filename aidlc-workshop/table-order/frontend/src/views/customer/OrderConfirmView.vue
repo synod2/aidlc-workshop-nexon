@@ -18,7 +18,7 @@
     <p v-if="error" class="error-message">{{ error }}</p>
 
     <div class="confirm-actions">
-      <router-link to="/customer/cart" class="btn-secondary">뒤로</router-link>
+      <router-link to="/customer/cart" class="btn-secondary back-btn">뒤로</router-link>
       <button
         class="btn-primary"
         :disabled="submitting"
@@ -101,8 +101,16 @@ hr {
   display: flex;
   gap: 12px;
   margin-top: 24px;
+  align-items: stretch;
 
   .btn-primary { flex: 1; }
-  .btn-secondary { text-decoration: none; text-align: center; }
+  .back-btn {
+    text-decoration: none;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 24px;
+  }
 }
 </style>

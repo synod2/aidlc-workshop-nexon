@@ -72,12 +72,30 @@ export const useAuthStore = defineStore('auth', () => {
     const tableToken = localStorage.getItem('table_token');
     const tableInfo = localStorage.getItem('table_info');
 
-    if (adminToken && adminInfo) {
-      token.value = adminToken;
-      userInfo.value = JSON.parse(adminInfo);
-    } else if (tableToken && tableInfo) {
-      token.value = tableToken;
-      userInfo.value = JSON.parse(tableInfo);
+    // Choose based on current path
+    const path = window.location.pathname;
+
+    if (path.startsWith('/customer')) {
+      // Customer pages: prefer table token
+      if (tableToken && tableInfo) {
+        token.value = tableToken;
+        userInfo.value = JSON.parse(tableInfo);
+      }
+    } else if (path.startsWith('/admin')) {
+      // Admin pages: prefer admin token
+      if (adminToken && adminInfo) {
+        token.value = adminToken;
+        userInfo.value = JSON.parse(adminInfo);
+      }
+    } else {
+      // Default: try admin first, then table
+      if (adminToken && adminInfo) {
+        token.value = adminToken;
+        userInfo.value = JSON.parse(adminInfo);
+      } else if (tableToken && tableInfo) {
+        token.value = tableToken;
+        userInfo.value = JSON.parse(tableInfo);
+      }
     }
   }
 

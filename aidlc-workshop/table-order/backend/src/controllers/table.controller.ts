@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { tableService } from '../services/table.service';
+import { sseService } from '../services/sse.service';
 import { sendSuccess, sendError } from '../utils/response';
 
 export class TableController {
@@ -66,6 +67,33 @@ export class TableController {
       const endDate = req.query.endDate as string | undefined;
       const history = tableService.getOrderHistory(tableId, storeId, startDate, endDate);
       sendSuccess(res, history);
+    } catch (err: any) {
+      sendError(res, err.message);
+    }
+  }
+
+  tableRequest(req: Request, res: Response): void {
+    try {
+      const user = req.user;
+      if (!user || user.role !== 'table') {
+        sendError(res, 'Table access required', 403);
+        return;
+      }
+
+      const { requestType, message } = req.body;
+      if (!requestType) {
+        sendError(res, 'requestType is required', 400);
+        return;
+      }
+
+      sseService.broadcastTableRequest(user.storeId, {
+        tableId: user.tableId,
+        tableNumber: user.tableNumber,
+        requestType,
+        message: message || '',
+      });
+
+      sendSuccess(res, { message: 'Request sent' });
     } catch (err: any) {
       sendError(res, err.message);
     }

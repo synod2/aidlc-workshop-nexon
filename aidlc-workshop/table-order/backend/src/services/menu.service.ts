@@ -1,4 +1,5 @@
 import { getDatabase } from '../database/connection';
+import { sseService } from './sse.service';
 import {
   MenuItem,
   Category,
@@ -151,7 +152,14 @@ export class MenuService {
     params.push(menuId);
     db.prepare(`UPDATE menu_items SET ${updates.join(', ')} WHERE id = ?`).run(...params);
 
-    return this.getMenuById(menuId)!;
+    const updated = this.getMenuById(menuId)!;
+
+    // Broadcast menu availability change to all table clients
+    if (dto.isAvailable !== undefined && dto.isAvailable !== existing.isAvailable) {
+      sseService.broadcastToAllTables(storeId, 'menu_updated', updated);
+    }
+
+    return updated;
   }
 
   deleteMenu(menuId: number, storeId: string): void {

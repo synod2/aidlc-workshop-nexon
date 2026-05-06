@@ -82,8 +82,8 @@ export class OrderController {
       const orderId = Number(req.params.id);
       const { status } = req.body as { status: OrderStatus };
 
-      if (!['pending', 'preparing', 'completed'].includes(status)) {
-        sendError(res, 'Invalid status. Must be pending, preparing, or completed', 400);
+      if (!['pending', 'preparing', 'completed', 'rejected'].includes(status)) {
+        sendError(res, 'Invalid status. Must be pending, preparing, completed, or rejected', 400);
         return;
       }
 

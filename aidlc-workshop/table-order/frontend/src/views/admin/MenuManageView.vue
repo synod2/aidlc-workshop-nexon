@@ -19,13 +19,18 @@
         <div
           v-for="item in menuStore.getMenusByCategory(category.id)"
           :key="item.id"
-          class="menu-row card"
+          :class="['menu-row', 'card', { 'sold-out': !item.isAvailable }]"
         >
           <div class="menu-info">
             <strong>{{ item.name }}</strong>
             <span class="menu-price">{{ item.price.toLocaleString() }}원</span>
+            <span v-if="!item.isAvailable" class="sold-out-badge">매진</span>
           </div>
           <div class="menu-actions">
+            <button
+              :class="item.isAvailable ? 'btn-warning' : 'btn-primary'"
+              @click="toggleAvailability(item)"
+            >{{ item.isAvailable ? '매진' : '판매재개' }}</button>
             <button class="btn-secondary" @click="openForm(item)">수정</button>
             <button class="btn-danger" @click="handleDelete(item.id)">삭제</button>
           </div>
@@ -140,6 +145,11 @@ async function handleDelete(id: number) {
   }
 }
 
+async function toggleAvailability(item: MenuItem) {
+  const newValue = item.isAvailable ? 0 : 1;
+  await menuStore.updateMenu(item.id, { isAvailable: newValue } as any);
+}
+
 async function handleCreateCategory() {
   if (newCategoryName.value) {
     await menuStore.createCategory(newCategoryName.value);
@@ -189,6 +199,10 @@ onMounted(async () => {
   justify-content: space-between;
   align-items: center;
   padding: 12px 16px;
+
+  &.sold-out {
+    opacity: 0.5;
+  }
 }
 
 .menu-info {
@@ -201,10 +215,25 @@ onMounted(async () => {
   color: var(--text-secondary);
 }
 
+.sold-out-badge {
+  background: #fee2e2;
+  color: var(--danger-color);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
 .menu-actions {
   display: flex;
   gap: 8px;
   button { padding: 6px 12px; font-size: 0.85rem; }
+}
+
+.btn-warning {
+  background-color: var(--warning-color);
+  color: white;
+  &:hover { background-color: #b45309; }
 }
 
 .form-actions {

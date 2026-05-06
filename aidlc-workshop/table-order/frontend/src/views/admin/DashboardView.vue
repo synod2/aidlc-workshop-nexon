@@ -70,6 +70,11 @@
                 @click="changeStatus(order.id, 'preparing')"
               >준비중</button>
               <button
+                v-if="order.status === 'pending'"
+                class="btn-danger"
+                @click="changeStatus(order.id, 'rejected')"
+              >거절</button>
+              <button
                 v-if="order.status === 'preparing'"
                 class="btn-primary"
                 @click="changeStatus(order.id, 'completed')"
@@ -85,12 +90,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useOrderStore, type Order } from '../../stores/order';
 import { useTableStore } from '../../stores/table';
 import { useAuthStore } from '../../stores/auth';
-import { sseClient } from '../../services/sse';
 
 const router = useRouter();
 const orderStore = useOrderStore();
@@ -100,6 +104,7 @@ const authStore = useAuthStore();
 const loading = ref(true);
 const selectedTable = ref<number | null>(null);
 const newOrderIds = ref<Set<number>>(new Set());
+const toast = ref('');
 
 function getTableOrders(tableId: number): Order[] {
   return orderStore.orders.filter((o) => o.tableId === tableId);
@@ -148,7 +153,6 @@ async function handleComplete(tableId: number) {
 }
 
 function handleLogout() {
-  sseClient.disconnect();
   authStore.logout();
   router.push('/admin/login');
 }
@@ -162,30 +166,6 @@ onMounted(async () => {
 
   await Promise.all([tableStore.fetchTables(), orderStore.fetchOrders()]);
   loading.value = false;
-
-  // Connect SSE
-  const token = authStore.token;
-  if (token) {
-    sseClient.connect(token);
-    sseClient.on('new_order', (order: Order) => {
-      orderStore.handleSSENewOrder(order);
-      newOrderIds.value.add(order.id);
-      setTimeout(() => newOrderIds.value.delete(order.id), 3000);
-    });
-    sseClient.on('order_updated', (order: Order) => {
-      orderStore.handleSSEOrderUpdate(order);
-    });
-    sseClient.on('order_deleted', (data: { orderId: number }) => {
-      orderStore.handleSSEOrderDeleted(data);
-    });
-    sseClient.on('session_completed', (data: { tableId: number }) => {
-      orderStore.handleSSESessionCompleted(data);
-    });
-  }
-});
-
-onUnmounted(() => {
-  sseClient.disconnect();
 });
 </script>
 

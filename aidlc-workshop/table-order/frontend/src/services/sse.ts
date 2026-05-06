@@ -11,6 +11,18 @@ export class SSEClient {
 
     this.eventSource = new EventSource(`/api/sse/orders?token=${token}`);
 
+    this.eventSource.onopen = () => {
+      console.log('Admin SSE: connected successfully');
+    };
+
+    this.eventSource.onerror = () => {
+      console.warn('Admin SSE: connection error, will auto-reconnect...');
+    };
+
+    this.eventSource.addEventListener('connected', (event) => {
+      console.log('Admin SSE: server confirmed connection', event.data);
+    });
+
     this.eventSource.addEventListener('new_order', (event) => {
       this.emit('new_order', JSON.parse(event.data));
     });
@@ -27,10 +39,9 @@ export class SSEClient {
       this.emit('session_completed', JSON.parse(event.data));
     });
 
-    this.eventSource.onerror = () => {
-      // Auto-reconnect is handled by EventSource
-      console.warn('SSE connection error, reconnecting...');
-    };
+    this.eventSource.addEventListener('table_request', (event) => {
+      this.emit('table_request', JSON.parse(event.data));
+    });
   }
 
   disconnect(): void {

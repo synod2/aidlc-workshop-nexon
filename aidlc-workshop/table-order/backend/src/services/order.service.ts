@@ -11,9 +11,10 @@ import { tableService } from './table.service';
 import { sseService } from './sse.service';
 
 const VALID_TRANSITIONS: Record<string, string[]> = {
-  pending: ['preparing', 'completed'],
+  pending: ['preparing', 'completed', 'rejected'],
   preparing: ['completed'],
   completed: [],
+  rejected: [],
 };
 
 export class OrderService {

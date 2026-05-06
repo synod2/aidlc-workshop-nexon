@@ -172,12 +172,16 @@ function formatPrice(price: number): string {
 .summary-actions {
   display: flex;
   gap: 12px;
+  align-items: stretch;
 }
 
 .order-btn {
   flex: 1;
   text-align: center;
   text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .back-link {

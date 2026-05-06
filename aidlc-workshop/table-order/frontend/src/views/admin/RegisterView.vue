@@ -48,7 +48,15 @@ async function handleRegister() {
     await authStore.register(storeId.value, username.value, password.value);
     router.push('/admin/dashboard');
   } catch (err: any) {
-    error.value = err.response?.data?.error || '회원가입에 실패했습니다';
+    if (err.response) {
+      const data = err.response.data;
+      error.value = data?.error || `서버 에러 (${err.response.status}): ${JSON.stringify(data)}`;
+    } else if (err.request) {
+      error.value = '서버에 연결할 수 없습니다. 백엔드가 실행 중인지 확인해주세요.';
+    } else {
+      error.value = err.message || '알 수 없는 에러가 발생했습니다';
+    }
+    console.error('Register error:', err);
   }
 }
 </script>

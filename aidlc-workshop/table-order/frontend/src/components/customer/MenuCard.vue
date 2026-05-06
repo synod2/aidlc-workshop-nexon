@@ -1,24 +1,31 @@
 <template>
-  <div class="menu-card card" :data-testid="`menu-card-${item.id}`">
-    <img
-      v-if="item.imageUrl"
-      :src="item.imageUrl"
-      :alt="item.name"
-      class="menu-image"
-    />
-    <div v-else class="menu-image-placeholder">🍽️</div>
+  <div :class="['menu-card', 'card', { 'sold-out': !item.isAvailable }]" :data-testid="`menu-card-${item.id}`">
+    <div class="image-wrapper">
+      <img
+        v-if="item.imageUrl"
+        :src="item.imageUrl"
+        :alt="item.name"
+        class="menu-image"
+      />
+      <div v-else class="menu-image-placeholder">🍽️</div>
+      <div v-if="!item.isAvailable" class="sold-out-overlay">
+        <span class="sold-out-text">매진</span>
+      </div>
+    </div>
     <div class="menu-info">
       <h3 class="menu-name">{{ item.name }}</h3>
       <p v-if="item.description" class="menu-desc">{{ item.description }}</p>
       <div class="menu-footer">
         <span class="menu-price">{{ formatPrice(item.price) }}원</span>
         <button
+          v-if="item.isAvailable"
           class="btn-primary add-btn"
           :data-testid="`menu-add-${item.id}`"
           @click="$emit('add', item)"
         >
           담기
         </button>
+        <span v-else class="sold-out-badge">매진</span>
       </div>
     </div>
   </div>
@@ -46,6 +53,15 @@ function formatPrice(price: number): string {
   flex-direction: column;
   overflow: hidden;
   padding: 0;
+  transition: opacity 0.3s;
+
+  &.sold-out {
+    opacity: 0.7;
+  }
+}
+
+.image-wrapper {
+  position: relative;
 }
 
 .menu-image {
@@ -62,6 +78,36 @@ function formatPrice(price: number): string {
   justify-content: center;
   background: #f1f5f9;
   font-size: 2.5rem;
+}
+
+.sold-out-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sold-out-text {
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 700;
+  background: var(--danger-color);
+  padding: 6px 16px;
+  border-radius: 4px;
+}
+
+.sold-out-badge {
+  background: #fee2e2;
+  color: var(--danger-color);
+  padding: 6px 12px;
+  border-radius: var(--radius);
+  font-size: 0.8rem;
+  font-weight: 600;
 }
 
 .menu-info {
